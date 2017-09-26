@@ -1,0 +1,35 @@
+global:
+  smtp_smarthost: localhost
+  smtp_from: alert@example.com
+
+route:
+    receiver: slack
+
+templates:
+- '/etc/alertmanager/default.tmpl'
+
+receivers:
+    - name: 'slack'
+      slack_configs:
+          - send_resolved: true
+            username: 'example.com'
+            channel: '#alerts'
+            api_url: 'https://hooks.slack.com/services/API/KEY'
+            title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] Monitoring Event Notification'
+            text: >-
+              {{ range .Alerts }}
+                 *Alert:* {{ .Annotations.summary }} - `{{ .Labels.severity }}`
+                 *Description:* {{ .Annotations.description }}
+                 *Details:*
+                {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+                {{ end }}
+              {{ end }}
+
+    - name: email
+      email_configs:
+      - to: admin@example.com
+        send_resolved: true
+        html: '{{ template "email.default.html" . }}'
+      - to: duty@example.com
+        send_resolved: true
+        html: '{{ template "email.default.html" . }}'

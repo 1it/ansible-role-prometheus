@@ -1,0 +1,31 @@
+---
+postgres_variables:
+    LANG=en_US.utf8
+    DB_NAME=grafana
+    USER_NAME=grafana
+    USER_PASSWD="{{ pg_user_passwd }}"
+    POSTGRES_PASSWORD="{{ pg_root_passwd }}"
+
+grafana_variables:
+    GF_SECURITY_ADMIN_PASSWORD="{{ gf_security_admin_passwd }}"
+    GF_USERS_ALLOW_SIGN_UP=false
+    GF_SMTP_ENABLED=true
+    GF_SMTP_HOST=localhost:25
+    GF_SMTP_FROM_NAME=Grafana
+    GF_SMTP_FROM_ADDRESS=grafana@example.com
+    GF_DATABASE_TYPE=postgres
+    GF_DATABASE_HOST=postgres:5432
+    GF_DATABASE_USER=grafana
+    GF_DATABASE_PASSWORD="{{ pg_user_passwd }}"
+
+prometheus_targets:
+    - app-1.dev.example.com:9100
+    - app-2.dev.example.com:9100
+    - db1.stage.example.com:9100
+
+prometheus_targets_label: nodeexporter
+
+blackbox_targets_label: blackbox
+
+prometheus_hosts: {}
+

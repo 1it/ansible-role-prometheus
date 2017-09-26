@@ -1,0 +1,115 @@
+# Prometheus global config
+
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'Example.com'
+
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+  - "alert.rules"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+        - targets: ['localhost:9090']
+
+  - job_name: 'nodeexporter'
+    scrape_interval: 5s
+
+    file_sd_configs:
+        - files:
+          - /etc/prometheus/targets.yml
+
+  - job_name: 'cadvisor'
+    scrape_interval: 5s
+
+    file_sd_configs:
+        - files:
+          - /etc/prometheus/cadvisor_targets.yml
+
+  - job_name: 'blackbox_http'
+    metrics_path: /probe
+    scrape_interval: 60s
+    params:
+        module: [http_2xx]
+
+    file_sd_configs:
+        - files:
+          - /etc/prometheus/blackbox_http.yml
+
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: (.*)(:80)?
+        target_label: __param_target
+        replacement: ${1}
+      - source_labels: [__param_target]
+        regex: (.*)
+        target_label: instance
+        replacement: ${1}
+      - source_labels: []
+        regex: .*
+        target_label: __address__
+        replacement: blackbox:9115
+
+  - job_name: 'blackbox_http_post'
+    metrics_path: /probe
+    scrape_interval: 60s
+    params:
+        module: [http_post_2xx]
+
+    file_sd_configs:
+        - files:
+          - /etc/prometheus/blackbox_http_post.yml
+
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: (.*)(:80)?
+        target_label: __param_target
+        replacement: ${1}
+      - source_labels: [__param_target]
+        regex: (.*)
+        target_label: instance
+        replacement: ${1}
+      - source_labels: []
+        regex: .*
+        target_label: __address__
+        replacement: blackbox:9115
+
+  - job_name: 'blackbox_http_auth'
+    metrics_path: /probe
+    scrape_interval: 60s
+    params:
+        module: [http_basic_auth]
+
+    file_sd_configs:
+        - files:
+          - /etc/prometheus/blackbox_http_auth.yml
+
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: (.*)(:80)?
+        target_label: __param_target
+        replacement: ${1}
+      - source_labels: [__param_target]
+        regex: (.*)
+        target_label: instance
+        replacement: ${1}
+      - source_labels: []
+        regex: .*
+        target_label: __address__
+        replacement: blackbox:9115

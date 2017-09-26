@@ -1,0 +1,7 @@
+---
+- targets:
+{% for url in prometheus_targets %}
+    - {{ url }}
+{% endfor %}
+  labels:
+    - job: '{{ prometheus_targets_label }}'

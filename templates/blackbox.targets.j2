@@ -1,0 +1,7 @@
+---
+- targets:
+{% for url in blackbox_targets %}
+    - {{ url }}
+{% endfor %}
+  labels:
+    - job: '{{ blackbox_targets_label }}'
